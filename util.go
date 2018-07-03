@@ -8,17 +8,28 @@ import (
 )
 
 func HandleHomePage() {
-	var HOME_PAGE string
+	var CLIENT_HOME string
 	var ok bool // XXX
-	if HOME_PAGE, ok = os.LookupEnv("HOME_PAGE"); !ok {
-		log.Fatal("HOME_PAGE environment variable not set. Should point to some.html")
+	if CLIENT_HOME, ok = os.LookupEnv("CLIENT_HOME"); !ok {
+		log.Fatal("CLIENT_HOME environment variable not set. Should point to some.html or client/dist")
 	}
-	log.Printf("path to home page %v\n", HOME_PAGE)
-	page, err := ioutil.ReadFile(HOME_PAGE)
+	log.Printf("path to home %v\n", CLIENT_HOME)
+
+	f, err := os.Stat(CLIENT_HOME)
 	if err != nil {
-		log.Fatal("Could not ReadFile %v", err)
+		log.Fatal(err)
 	}
-	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(page)
-	}))
+	switch mode := f.Mode(); {
+	case mode.IsDir():
+		files := http.FileServer(http.Dir(CLIENT_HOME))
+		http.Handle("/", files)
+	case mode.IsRegular():
+		page, err := ioutil.ReadFile(CLIENT_HOME)
+		if err != nil {
+			log.Fatal("Could not ReadFile %v", err)
+		}
+		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Write(page)
+		}))
+	}
 }

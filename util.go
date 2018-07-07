@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func HandleHomePage() {
+func HandleHomePage(mux *http.ServeMux) {
 	var CLIENT_HOME string
 	var ok bool // XXX
 	if CLIENT_HOME, ok = os.LookupEnv("CLIENT_HOME"); !ok {
@@ -22,13 +22,13 @@ func HandleHomePage() {
 	switch mode := f.Mode(); {
 	case mode.IsDir():
 		files := http.FileServer(http.Dir(CLIENT_HOME))
-		http.Handle("/", files)
+		mux.Handle("/", files)
 	case mode.IsRegular():
 		page, err := ioutil.ReadFile(CLIENT_HOME)
 		if err != nil {
 			log.Fatal("Could not ReadFile %v", err)
 		}
-		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Write(page)
 		}))
 	}

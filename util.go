@@ -7,14 +7,7 @@ import (
 	"os"
 )
 
-func HandleHomePage(mux *http.ServeMux) {
-	var CLIENT_HOME string
-	var ok bool // XXX
-	if CLIENT_HOME, ok = os.LookupEnv("CLIENT_HOME"); !ok {
-		log.Fatal("CLIENT_HOME environment variable not set. Should point to some.html or client/dist")
-	}
-	log.Printf("path to home %v\n", CLIENT_HOME)
-
+func HandleHomePage(mux *http.ServeMux, CLIENT_HOME string) {
 	f, err := os.Stat(CLIENT_HOME)
 	if err != nil {
 		log.Fatal(err)

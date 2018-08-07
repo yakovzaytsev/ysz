@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/mail"
 	"net/smtp"
-	"os"
 	"sync"
 
 	"github.com/yakovzaytsev/ysz/pkg/ysz"
@@ -118,7 +117,7 @@ func getAndRmEmailVerificationOrder(token string) EmailVerificationOrder {
 	return o
 }
 
-func VerifyEmail(w http.ResponseWriter, r *http.Request) {
+func VerifyEmail(w http.ResponseWriter, r *http.Request, send func(string, string)) {
 	email := r.URL.Query().Get("e")
 	if len(email) == 0 {
 		log.Print("verifyEmail: no email")
@@ -130,9 +129,7 @@ func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	hash := ysz.RandSeq(4)
 
 	// TODO send hash in email
-	Send(email, "yakov@freshGDPR.com", os.Getenv("GMAIL_AUTH_EMAIL"), os.Getenv("EMAIL_PASSWORD"), "Your freshGDPR verification code", fmt.Sprintf(`<p>Hello,</p>
-<p>please enter this verification code %s</p>
-`, hash))
+	send(email, hash)
 
 	order := EmailVerificationOrder{Email: email, Hash: hash}
 	token := saveEmailVerificationOrder(order)

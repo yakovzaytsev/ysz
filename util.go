@@ -19,7 +19,7 @@ func HandleHomePage(mux *http.ServeMux, CLIENT_HOME string) {
 	case mode.IsRegular():
 		page, err := ioutil.ReadFile(CLIENT_HOME)
 		if err != nil {
-			log.Fatal("Could not ReadFile %v", err)
+			log.Fatalf("Could not ReadFile %v", err)
 		}
 		mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Write(page)

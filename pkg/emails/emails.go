@@ -118,7 +118,7 @@ func getAndRmEmailVerificationOrder(token string) EmailVerificationOrder {
 	return o
 }
 
-func verifyEmail(w http.ResponseWriter, r *http.Request) {
+func VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("e")
 	if len(email) == 0 {
 		log.Print("verifyEmail: no email")
@@ -147,7 +147,7 @@ func verifyEmail(w http.ResponseWriter, r *http.Request) {
 }`, token)))
 }
 
-func checkEmailCode(w http.ResponseWriter, r *http.Request) {
+func CheckEmailCode(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("t")
 	if len(token) == 0 {
 		log.Print("checkEmailCode: no token")

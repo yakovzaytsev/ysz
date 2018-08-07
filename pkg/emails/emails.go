@@ -3,7 +3,7 @@ package emails
 import (
 	"sync"
 
-	"gitub.com/yakovzaytsev/ysz"
+	"github.com/yakovzaytsev/ysz"
 )
 
 type EmailVerificationOrder struct {

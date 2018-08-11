@@ -129,30 +129,14 @@ func VerifyEmail(email string) string {
 	return token
 }
 
-func CheckEmailCode(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("t")
-	if len(token) == 0 {
-		log.Print("checkEmailCode: no token")
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	log.Printf("checkEmailCode: token: %s", token)
-
-	got_hash := r.URL.Query().Get("h")
-	if len(got_hash) == 0 {
-		log.Print("checkEmailCode: no hash")
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	log.Printf("checkEmailCode: hash: %s", got_hash)
-
+func CheckEmailCode(token, got_hash string) bool {
 	o := getAndRmEmailVerificationOrder(token)
 
 	if got_hash != o.Hash {
 		log.Printf("checkEmailCode: expected %s got %s", o.Hash, got_hash)
-		w.WriteHeader(http.StatusForbidden)
-		return
+
+		return false
 	}
 
-	w.WriteHeader(http.StatusOK)
+	return true
 }

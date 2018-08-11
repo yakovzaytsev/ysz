@@ -13,7 +13,7 @@ import (
 	"github.com/yakovzaytsev/ysz/pkg/ysz"
 )
 
-func Send(email, fromEmail, authEmail, EMAIL_PASSWORD, subj, body string) {
+func Send(email, fromEmail, authEmail, EMAIL_PASSWORD, subj, body string) error {
 	from := mail.Address{"", fromEmail}
 	to := mail.Address{"", email}
 
@@ -52,45 +52,46 @@ func Send(email, fromEmail, authEmail, EMAIL_PASSWORD, subj, body string) {
 	// from the very beginning (no starttls)
 	conn, err := tls.Dial("tcp", servername, tlsconfig)
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	c, err := smtp.NewClient(conn, host)
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	// Auth
 	if err = c.Auth(auth); err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	// To && From
 	if err = c.Mail(from.Address); err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	if err = c.Rcpt(to.Address); err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	// Data
 	w, err := c.Data()
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	_, err = w.Write([]byte(message))
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	err = w.Close()
 	if err != nil {
-		log.Panic(err)
+		return err
 	}
 
 	c.Quit()
+	return nil
 }
 
 type EmailVerificationOrder struct {
@@ -117,31 +118,15 @@ func getAndRmEmailVerificationOrder(token string) EmailVerificationOrder {
 	return o
 }
 
-func VerifyEmail(w http.ResponseWriter, r *http.Request, send func(string, string)) {
-	email := r.URL.Query().Get("e")
-	if len(email) == 0 {
-		log.Print("verifyEmail: no email")
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-	log.Printf("verifyEmail: email: %s", email)
-
+// returns hash
+// send it
+func VerifyEmail(email string) string {
 	hash := ysz.RandSeq(4)
-
-	// TODO send hash in email
-	send(email, hash)
 
 	order := EmailVerificationOrder{Email: email, Hash: hash}
 	token := saveEmailVerificationOrder(order)
 
-	// w.WriteHeader(http.StatusForbidden)
-	// return
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf(`
-{
-	"t": "%s"
-}`, token)))
+	return token
 }
 
 func CheckEmailCode(w http.ResponseWriter, r *http.Request) {

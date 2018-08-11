@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"net/mail"
 	"net/smtp"
 	"sync"

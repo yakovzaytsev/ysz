@@ -119,13 +119,13 @@ func getAndRmEmailVerificationOrder(token string) EmailVerificationOrder {
 
 // returns hash
 // send it
-func VerifyEmail(email string) string {
+func VerifyEmail(email string) (string, string) {
 	hash := ysz.RandSeq(4)
 
 	order := EmailVerificationOrder{Email: email, Hash: hash}
 	token := saveEmailVerificationOrder(order)
 
-	return token
+	return hash, token
 }
 
 func CheckEmailCode(token, got_hash string) bool {
